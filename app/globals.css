@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/* Hover overlays only where there is a pointer and room for them;
+   touch and narrow screens get the caption below the media instead. */
+@custom-variant overlay (@media (hover: hover) and (min-width: 48rem));
+
+@theme inline {
+  --font-sans: var(--font-inter), "Inter", Arial, sans-serif;
+  --font-display: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  /* Framer's tween: 0.2s cubic-bezier(.22, 0, .78, 1) */
+  --ease-framer: cubic-bezier(0.22, 0, 0.78, 1);
+}
+
+html {
+  background: #fff;
+  color: #000;
+}
+
+body {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* Photo mosaic ------------------------------------------------------------ */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* The lead photo stays put so it paints immediately (LCP); the rest cascade in. */
+.mosaic .tile:not(:first-child) {
+  animation: rise 0.8s var(--ease-framer) both;
+}
+
+.mosaic .tile-surface {
+  transition:
+    transform 0.2s var(--ease-framer),
+    opacity 0.3s var(--ease-framer);
+}
+
+.mosaic .tile:hover .tile-surface,
+.mosaic .tile:focus-within .tile-surface {
+  transform: scale(1.02);
+}
+
+/* Spotlight: on pointer devices, dim the frames you are not looking at. */
+@media (hover: hover) {
+  .mosaic:has(.tile:hover) .tile:not(:hover) .tile-surface {
+    opacity: 0.55;
+  }
+}
+
+.lightbox[open] {
+  animation: fade 0.2s var(--ease-framer);
+}
+
+.lightbox[open]::backdrop {
+  animation: fade 0.2s var(--ease-framer);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mosaic .tile:not(:first-child),
+  .lightbox[open],
+  .lightbox[open]::backdrop {
+    animation: none;
+  }
+}
