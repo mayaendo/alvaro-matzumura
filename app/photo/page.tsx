@@ -8,7 +8,7 @@ export default function PhotoPage() {
   return (
     <section
       aria-labelledby="photo-title"
-      className="mx-auto w-full max-w-[978px] px-5 py-10 md:py-24 lg:px-0"
+      className="px-[5vw] pt-6 pb-[16vw] md:px-[4vw] md:pt-10 md:pb-[12vw]"
     >
       <h1 id="photo-title" className="sr-only">
         photo

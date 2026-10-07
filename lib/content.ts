@@ -17,19 +17,43 @@ export const homeVideo = {
 };
 
 /**
- * Photo mosaic. A `null` image renders an empty frame, mirroring the
- * unfilled tiles of the original Framer collage. Replace with a static
- * import (e.g. `import photo02 from "@/public/img/photo-02.jpg"`) to fill it.
+ * Photo mosaic: 13 frames in a masonry, same rhythm of portrait and
+ * landscape ratios as the reference gallery. An empty frame (`image: null`)
+ * keeps its `ratio`; to fill it, import the file
+ * (`import photo02 from "@/public/img/photo-02.jpg"`) and set `image` + `alt`.
+ * A filled frame takes its ratio from the image itself.
  */
-export type Photo = { image: StaticImageData | null; alt: string };
+export type Photo = {
+  image: StaticImageData | null;
+  alt: string;
+  /** width / height, used while the frame is empty */
+  ratio: [number, number];
+};
+
+const PORTRAIT_35MM: [number, number] = [152, 225];
+const PORTRAIT: [number, number] = [2, 3];
+const LANDSCAPE: [number, number] = [3, 2];
+
+const empty = (ratio: [number, number]): Photo => ({ image: null, alt: "", ratio });
 
 export const photos: Photo[] = [
-  { image: photo01, alt: "Puesto callejero cubierto con cortinas de plástico transparente" },
-  { image: null, alt: "" },
-  { image: null, alt: "" },
-  { image: null, alt: "" },
-  { image: null, alt: "" },
-  { image: null, alt: "" },
+  empty(PORTRAIT_35MM),
+  {
+    image: photo01,
+    alt: "Puesto callejero cubierto con cortinas de plástico transparente",
+    ratio: LANDSCAPE,
+  },
+  empty(PORTRAIT_35MM),
+  empty(LANDSCAPE),
+  empty(LANDSCAPE),
+  empty(PORTRAIT_35MM),
+  empty(PORTRAIT),
+  empty(LANDSCAPE),
+  empty(LANDSCAPE),
+  empty(LANDSCAPE),
+  empty(PORTRAIT),
+  empty(LANDSCAPE),
+  empty(PORTRAIT),
 ];
 
 export type MotionProject = {

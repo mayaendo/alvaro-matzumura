@@ -7,8 +7,6 @@
 @theme inline {
   --font-sans: var(--font-inter), "Inter", Arial, sans-serif;
   --font-display: Arial, "Helvetica Neue", Helvetica, sans-serif;
-  /* Framer's tween: 0.2s cubic-bezier(.22, 0, .78, 1) */
-  --ease-framer: cubic-bezier(0.22, 0, 0.78, 1);
 }
 
 html {
@@ -27,42 +25,68 @@ html:has(dialog[open]) {
 
 /* Photo mosaic ------------------------------------------------------------ */
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
+.masonry {
+  --gap: clamp(4px, 1.6vw, 8px);
+  align-items: flex-start;
+  gap: var(--gap);
+}
+
+@media (min-width: 48rem) {
+  .masonry {
+    --gap: clamp(4px, 0.8vw, 12px);
   }
 }
 
-/* The lead photo stays put so it paints immediately (LCP); the rest cascade in. */
-.mosaic .tile:not(:first-child) {
-  animation: rise 0.8s var(--ease-framer) both;
+.masonry-col {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
-.mosaic .tile-surface {
+.masonry .tile {
+  overflow: hidden;
+  margin-bottom: var(--gap);
+}
+
+.masonry .tile-media {
   transition:
-    transform 0.2s var(--ease-framer),
-    opacity 0.3s var(--ease-framer);
+    opacity 1.1s cubic-bezier(0.165, 0.84, 0.44, 1) var(--reveal-delay, 0s),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.mosaic .tile:hover .tile-surface,
-.mosaic .tile:focus-within .tile-surface {
-  transform: scale(1.02);
-}
-
-/* Spotlight: on pointer devices, dim the frames you are not looking at. */
-@media (hover: hover) {
-  .mosaic:has(.tile:hover) .tile:not(:hover) .tile-surface {
-    opacity: 0.55;
+/* Hidden until scrolled into view — only when JS can reveal it again. */
+@media (scripting: enabled) {
+  .masonry .tile-media:not([data-shown]) {
+    opacity: 0;
   }
 }
 
-.lightbox[open] {
-  animation: fade 0.2s var(--ease-framer);
+@media (hover: hover) {
+  .masonry .tile:hover .tile-media {
+    transform: scale(1.04);
+  }
 }
 
+.masonry .tile:has(:focus-visible) {
+  outline: 1px solid #000;
+  outline-offset: 2px;
+}
+
+/* Lightbox ---------------------------------------------------------------- */
+
+.lightbox::backdrop {
+  background: rgb(0 0 0 / 0.94);
+}
+
+.lightbox[open],
 .lightbox[open]::backdrop {
-  animation: fade 0.2s var(--ease-framer);
+  animation: fade 0.22s ease;
+}
+
+.lightbox[data-closing],
+.lightbox[data-closing]::backdrop {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
 }
 
 @keyframes fade {
@@ -72,7 +96,10 @@ html:has(dialog[open]) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mosaic .tile:not(:first-child),
+  .masonry .tile-media {
+    transition: none;
+  }
+
   .lightbox[open],
   .lightbox[open]::backdrop {
     animation: none;
