@@ -1,23 +1,24 @@
 import { pageMetadata } from "@/lib/metadata";
 import { AutoplayVideo } from "@/components/autoplay-video";
+import { VimeoPopup } from "@/components/vimeo-popup";
 import { motionProjects, type MotionProject } from "@/lib/content";
 
 export const metadata = pageMetadata("/motion", "motion");
 
 const fade = "transition-opacity duration-400 ease-out";
 
-function Project({ title, description, src, poster, href }: MotionProject) {
+function Project({ title, description, src, poster, vimeoId }: MotionProject) {
   const body = (
     <>
       <div className="relative aspect-video w-full overflow-hidden bg-[#fafdff] md:aspect-[16/5]">
         <AutoplayVideo src={src} poster={poster} className="size-full object-cover" />
         <div
           aria-hidden="true"
-          className={`absolute inset-0 hidden bg-black/55 opacity-0 overlay:block ${fade} group-hover:opacity-100 group-focus-visible:opacity-100`}
+          className={`absolute inset-0 hidden bg-black/55 opacity-0 overlay:block ${fade} group-hover:opacity-100 group-has-focus-visible:opacity-100`}
         />
       </div>
       <div
-        className={`px-5 pt-3 overlay:absolute overlay:inset-0 overlay:p-0 overlay:text-white overlay:opacity-0 ${fade} group-hover:opacity-100 group-focus-visible:opacity-100`}
+        className={`px-5 pt-3 overlay:absolute overlay:inset-0 overlay:p-0 overlay:text-white overlay:opacity-0 ${fade} group-hover:opacity-100 group-has-focus-visible:opacity-100`}
       >
         <h2 className="font-display text-[22px] leading-none tracking-[-0.05em] overlay:absolute overlay:top-1/2 overlay:left-[18.4%] overlay:-translate-y-1/2 overlay:text-[30px]">
           {title}
@@ -30,20 +31,11 @@ function Project({ title, description, src, poster, href }: MotionProject) {
   );
 
   return (
-    <article>
-      {href ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group relative block focus-visible:outline-none"
-        >
-          {body}
-          <span className="sr-only">(Vimeo, abre en una pestaña nueva)</span>
-        </a>
-      ) : (
-        <div className="group relative cursor-pointer">{body}</div>
-      )}
+    <article
+      className={`group relative ${vimeoId ? "has-focus-visible:outline-1 has-focus-visible:outline-offset-4" : ""}`}
+    >
+      {body}
+      {vimeoId && <VimeoPopup vimeoId={vimeoId} title={title} />}
     </article>
   );
 }

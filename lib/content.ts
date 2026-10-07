@@ -61,7 +61,8 @@ export type MotionProject = {
   description: string;
   src: string;
   poster: string;
-  href?: string;
+  /** Full-length cut on Vimeo, played in a popup (the number in vimeo.com/…). */
+  vimeoId?: string;
 };
 
 // The original reuses the "la caminata" description for all three projects.
@@ -72,7 +73,7 @@ export const motionProjects: MotionProject[] = [
       "A cinematic portrait of movement, landscape, and everyday life in Ayaviri, Puno. A visual exploration of the journey through the Andean landscape, created for Baika.",
     src: "/video/la-caminata.mp4",
     poster: "/img/posters/la-caminata.jpg",
-    href: "https://vimeo.com/1154904862",
+    vimeoId: "1154904862",
   },
   {
     title: "tokyo",

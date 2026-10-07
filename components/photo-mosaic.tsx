@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Photo } from "@/lib/content";
+import { lightboxButton as btn, useLightbox } from "./use-lightbox";
 
 /** Height relative to width, from the image itself or the empty frame's ratio. */
 const relHeight = ({ image, ratio }: Photo) =>
@@ -23,11 +24,8 @@ function toColumns(photos: Photo[], n: number) {
   return cols;
 }
 
-const FADE_MS = 220;
-
 export function PhotoMosaic({ photos }: { photos: Photo[] }) {
   const gridRef = useRef<HTMLDivElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [active, setActive] = useState<number | null>(null);
   const [swapping, setSwapping] = useState(false);
 
@@ -59,21 +57,6 @@ export function PhotoMosaic({ photos }: { photos: Photo[] }) {
     return () => observer.disconnect();
   }, []);
 
-  const open = (i: number) => {
-    setActive(i);
-    dialogRef.current?.showModal();
-  };
-
-  const close = useCallback(() => {
-    const dialog = dialogRef.current;
-    if (!dialog?.open || dialog.dataset.closing !== undefined) return;
-    dialog.dataset.closing = "";
-    setTimeout(() => {
-      dialog.close();
-      delete dialog.dataset.closing;
-    }, FADE_MS);
-  }, []);
-
   const step = useCallback(
     (dir: 1 | -1) => {
       setSwapping(true);
@@ -89,21 +72,23 @@ export function PhotoMosaic({ photos }: { photos: Photo[] }) {
     [filled],
   );
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        close();
-      }
+  const onKey = useCallback(
+    (e: KeyboardEvent) => {
       if (filled.length < 2) return;
       if (e.key === "ArrowRight") step(1);
       if (e.key === "ArrowLeft") step(-1);
-    };
-    dialog.addEventListener("keydown", onKey);
-    return () => dialog.removeEventListener("keydown", onKey);
-  }, [close, step, filled.length]);
+    },
+    [step, filled.length],
+  );
+
+  const onClosed = useCallback(() => setActive(null), []);
+  const lightbox = useLightbox({ onKey, onClosed });
+  const { dialogRef, close } = lightbox;
+
+  const open = (i: number) => {
+    setActive(i);
+    lightbox.open();
+  };
 
   const tile = (i: number) => {
     const photo = photos[i];
@@ -132,8 +117,6 @@ export function PhotoMosaic({ photos }: { photos: Photo[] }) {
   };
 
   const current = active === null ? null : photos[active];
-  const btn =
-    "absolute text-white opacity-55 transition-opacity duration-200 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none";
 
   return (
     <>
@@ -154,7 +137,6 @@ export function PhotoMosaic({ photos }: { photos: Photo[] }) {
 
       <dialog
         ref={dialogRef}
-        onClose={() => setActive(null)}
         onClick={close}
         aria-label="Foto ampliada"
         className="lightbox m-0 h-dvh max-h-none w-screen max-w-none cursor-zoom-out bg-transparent p-0"
