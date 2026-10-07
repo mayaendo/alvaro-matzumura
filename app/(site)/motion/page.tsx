@@ -1,7 +1,8 @@
 import { pageMetadata } from "@/lib/metadata";
 import { AutoplayVideo } from "@/components/autoplay-video";
 import { VimeoPopup } from "@/components/vimeo-popup";
-import { motionProjects, type MotionProject } from "@/lib/content";
+import type { MotionProject } from "@/lib/content";
+import { getMotion } from "@/lib/sanity";
 
 export const metadata = pageMetadata("/motion", "motion");
 
@@ -40,12 +41,13 @@ function Project({ title, description, src, poster, vimeoId }: MotionProject) {
   );
 }
 
-export default function MotionPage() {
+export default async function MotionPage() {
+  const projects = await getMotion();
   return (
     <section aria-label="motion" className="flex flex-col gap-12 pt-6 pb-24 md:gap-[90px] md:pt-[39px] md:pb-[167px]">
       <h1 className="sr-only">motion</h1>
-      {motionProjects.map((project) => (
-        <Project key={project.title} {...project} />
+      {projects.map((project, i) => (
+        <Project key={`${i}-${project.title}`} {...project} />
       ))}
     </section>
   );

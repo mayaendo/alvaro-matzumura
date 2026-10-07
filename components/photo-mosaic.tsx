@@ -2,29 +2,34 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Photo } from "@/lib/content";
+import type { Frame, ImageSource } from "@/lib/content";
 import { lightboxButton as btn, useLightbox } from "./use-lightbox";
 
-/** Height relative to width, from the image itself or the empty frame's ratio. */
-const relHeight = ({ image, ratio }: Photo) =>
-  image ? image.height / image.width : ratio[1] / ratio[0];
+/** next/image props for a bundled or Sanity-hosted image. */
+const imageProps = ({ src, width, height, blurDataURL }: ImageSource) => ({
+  src,
+  width,
+  height,
+  blurDataURL,
+  placeholder: blurDataURL ? ("blur" as const) : ("empty" as const),
+});
 
 /**
  * Masonry: walk the photos in order and drop each one into the currently
  * shortest column, so columns stay balanced while reading order is kept.
  */
-function toColumns(photos: Photo[], n: number) {
+function toColumns(photos: Frame[], n: number) {
   const heights = new Array<number>(n).fill(0);
   const cols = Array.from({ length: n }, () => [] as number[]);
   photos.forEach((photo, i) => {
     const shortest = heights.indexOf(Math.min(...heights));
     cols[shortest].push(i);
-    heights[shortest] += relHeight(photo);
+    heights[shortest] += photo.ratio[1] / photo.ratio[0];
   });
   return cols;
 }
 
-export function PhotoMosaic({ photos }: { photos: Photo[] }) {
+export function PhotoMosaic({ frames: photos }: { frames: Frame[] }) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number | null>(null);
   const [swapping, setSwapping] = useState(false);
@@ -92,7 +97,7 @@ export function PhotoMosaic({ photos }: { photos: Photo[] }) {
 
   const tile = (i: number) => {
     const photo = photos[i];
-    const [w, h] = photo.image ? [photo.image.width, photo.image.height] : photo.ratio;
+    const [w, h] = photo.ratio;
     return (
       <div key={i} className="tile" style={{ aspectRatio: `${w} / ${h}` }}>
         {photo.image ? (
@@ -103,7 +108,7 @@ export function PhotoMosaic({ photos }: { photos: Photo[] }) {
             className="tile-media block size-full cursor-pointer"
           >
             <Image
-              src={photo.image}
+              {...imageProps(photo.image)}
               alt={photo.alt}
               sizes="(min-width: 768px) 23vw, 46vw"
               className="size-full object-cover"
@@ -144,7 +149,7 @@ export function PhotoMosaic({ photos }: { photos: Photo[] }) {
         {current?.image && (
           <div className="flex size-full items-center justify-center">
             <Image
-              src={current.image}
+              {...imageProps(current.image)}
               alt={current.alt}
               sizes="92vw"
               onClick={(e) => e.stopPropagation()}

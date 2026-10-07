@@ -1,4 +1,3 @@
-import type { StaticImageData } from "next/image";
 import photo01 from "@/public/img/photo-01.jpg";
 
 export const site = {
@@ -11,62 +10,74 @@ export const nav = [
   { href: "/motion", label: "motion" },
 ] as const;
 
-export const homeVideo = {
-  src: "/video/home.mp4",
-  poster: "/img/posters/home.jpg",
+/*
+ * Content types shared by Sanity (lib/sanity.ts) and the bundled fallback
+ * below, which the site uses until the Sanity project is connected.
+ */
+
+export type HomeVideo = { src: string; poster?: string };
+
+/** Structurally compatible with a static image import. */
+export type ImageSource = {
+  src: string;
+  width: number;
+  height: number;
+  blurDataURL?: string;
 };
 
-/**
- * Photo mosaic: 13 frames in a masonry, same rhythm of portrait and
- * landscape ratios as the reference gallery. An empty frame (`image: null`)
- * keeps its `ratio`; to fill it, import the file
- * (`import photo02 from "@/public/img/photo-02.jpg"`) and set `image` + `alt`.
- * A filled frame takes its ratio from the image itself.
- */
-export type Photo = {
-  image: StaticImageData | null;
-  alt: string;
-  /** width / height, used while the frame is empty */
-  ratio: [number, number];
-};
+export type Photo = { image: ImageSource; alt: string };
+
+/** A slot in the mosaic: a photo, or an empty frame of a given ratio. */
+export type Frame = { image: ImageSource | null; alt: string; ratio: [number, number] };
 
 const PORTRAIT_35MM: [number, number] = [152, 225];
 const PORTRAIT: [number, number] = [2, 3];
 const LANDSCAPE: [number, number] = [3, 2];
 
-const empty = (ratio: [number, number]): Photo => ({ image: null, alt: "", ratio });
+/**
+ * The mosaic always shows at least 13 frames, with the same rhythm of
+ * portrait and landscape ratios as the reference gallery. Photos fill the
+ * first slots in order; the rest stay as empty frames.
+ */
+const FRAME_RATIOS = [
+  PORTRAIT_35MM, LANDSCAPE, PORTRAIT_35MM, LANDSCAPE, LANDSCAPE, PORTRAIT_35MM,
+  PORTRAIT, LANDSCAPE, LANDSCAPE, LANDSCAPE, PORTRAIT, LANDSCAPE, PORTRAIT,
+];
 
-export const photos: Photo[] = [
-  empty(PORTRAIT_35MM),
-  {
-    image: photo01,
-    alt: "Puesto callejero cubierto con cortinas de plástico transparente",
-    ratio: LANDSCAPE,
-  },
-  empty(PORTRAIT_35MM),
-  empty(LANDSCAPE),
-  empty(LANDSCAPE),
-  empty(PORTRAIT_35MM),
-  empty(PORTRAIT),
-  empty(LANDSCAPE),
-  empty(LANDSCAPE),
-  empty(LANDSCAPE),
-  empty(PORTRAIT),
-  empty(LANDSCAPE),
-  empty(PORTRAIT),
+export function toFrames(photos: Photo[]): Frame[] {
+  const filled: Frame[] = photos.map(({ image, alt }) => ({
+    image,
+    alt,
+    ratio: [image.width, image.height],
+  }));
+  const empty: Frame[] = FRAME_RATIOS.slice(photos.length).map((ratio) => ({
+    image: null,
+    alt: "",
+    ratio,
+  }));
+  return [...filled, ...empty];
+}
+
+export const fallbackHome: HomeVideo = {
+  src: "/video/home.mp4",
+  poster: "/img/posters/home.jpg",
+};
+
+export const fallbackPhotos: Photo[] = [
+  { image: photo01, alt: "Puesto callejero cubierto con cortinas de plástico transparente" },
 ];
 
 export type MotionProject = {
   title: string;
   description: string;
   src: string;
-  poster: string;
+  poster?: string;
   /** Full-length cut on Vimeo, played in a popup (the number in vimeo.com/…). */
   vimeoId?: string;
 };
 
 // The original reuses the "la caminata" description for all three projects.
-export const motionProjects: MotionProject[] = [
+export const fallbackMotion: MotionProject[] = [
   {
     title: "la caminata",
     description:

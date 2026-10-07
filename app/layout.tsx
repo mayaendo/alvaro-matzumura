@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import { SiteNav } from "@/components/site-nav";
 import { site } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
 import "./globals.css";
@@ -31,10 +30,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} antialiased`}>
-      <body className="flex min-h-dvh flex-col font-sans">
-        <SiteNav />
-        <main className="flex-1">{children}</main>
-      </body>
+      <body className="font-sans">{children}</body>
     </html>
   );
 }

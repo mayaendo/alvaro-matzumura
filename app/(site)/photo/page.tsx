@@ -1,10 +1,12 @@
 import { pageMetadata } from "@/lib/metadata";
 import { PhotoMosaic } from "@/components/photo-mosaic";
-import { photos } from "@/lib/content";
+import { toFrames } from "@/lib/content";
+import { getPhotos } from "@/lib/sanity";
 
 export const metadata = pageMetadata("/photo", "photo");
 
-export default function PhotoPage() {
+export default async function PhotoPage() {
+  const photos = await getPhotos();
   return (
     <section
       aria-labelledby="photo-title"
@@ -13,7 +15,7 @@ export default function PhotoPage() {
       <h1 id="photo-title" className="sr-only">
         photo
       </h1>
-      <PhotoMosaic photos={photos} />
+      <PhotoMosaic frames={toFrames(photos)} />
     </section>
   );
 }

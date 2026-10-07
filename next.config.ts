@@ -6,6 +6,9 @@ const diskCache = Boolean(process.env.VERCEL);
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  images: {
+    remotePatterns: [new URL("https://cdn.sanity.io/images/**")],
+  },
   partialPrefetching: true,
   experimental: {
     turbopackFileSystemCacheForDev: diskCache,

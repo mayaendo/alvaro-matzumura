@@ -1,7 +1,9 @@
 import { AutoplayVideo } from "@/components/autoplay-video";
-import { homeVideo, site } from "@/lib/content";
+import { site } from "@/lib/content";
+import { getHome } from "@/lib/sanity";
 
-export default function Home() {
+export default async function Home() {
+  const homeVideo = await getHome();
   return (
     <section aria-label={site.name} className="pt-6 pb-24 md:pt-8 md:pb-[193px]">
       <h1 className="sr-only">{site.name}</h1>
