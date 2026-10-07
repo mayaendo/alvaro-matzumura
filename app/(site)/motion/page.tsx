@@ -1,5 +1,6 @@
 import { pageMetadata } from "@/lib/metadata";
 import { AutoplayVideo } from "@/components/autoplay-video";
+import { Reveal } from "@/components/reveal";
 import { VimeoPopup } from "@/components/vimeo-popup";
 import type { MotionProject } from "@/lib/content";
 import { getMotion } from "@/lib/sanity";
@@ -33,6 +34,7 @@ function Project({ title, description, src, poster, vimeoId }: MotionProject) {
 
   return (
     <article
+      data-reveal
       className={`group relative ${vimeoId ? "has-focus-visible:outline-1 has-focus-visible:outline-offset-4" : ""}`}
     >
       {body}
@@ -44,11 +46,13 @@ function Project({ title, description, src, poster, vimeoId }: MotionProject) {
 export default async function MotionPage() {
   const projects = await getMotion();
   return (
-    <section aria-label="motion" className="flex flex-col gap-12 pt-6 pb-24 md:gap-[90px] md:pt-[39px] md:pb-[167px]">
+    <section aria-label="motion" className="pt-6 pb-24 md:pt-[39px] md:pb-[167px]">
       <h1 className="sr-only">motion</h1>
-      {projects.map((project, i) => (
-        <Project key={`${i}-${project.title}`} {...project} />
-      ))}
+      <Reveal className="flex flex-col gap-12 md:gap-[90px]">
+        {projects.map((project, i) => (
+          <Project key={`${i}-${project.title}`} {...project} />
+        ))}
+      </Reveal>
     </section>
   );
 }

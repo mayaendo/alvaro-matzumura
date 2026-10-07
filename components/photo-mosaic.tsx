@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { Frame, ImageSource } from "@/lib/content";
+import { useReveal } from "./reveal";
 import { lightboxButton as btn, useLightbox } from "./use-lightbox";
 
 /** next/image props for a bundled or Sanity-hosted image. */
@@ -41,26 +42,7 @@ export function PhotoMosaic({ frames: photos }: { frames: Frame[] }) {
     [photos],
   );
 
-  // Scroll reveal: frames entering together fade in as a short cascade.
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries
-          .filter((e) => e.isIntersecting)
-          .forEach((e, k) => {
-            const el = e.target as HTMLElement;
-            el.style.setProperty("--reveal-delay", `${k * 70}ms`);
-            el.dataset.shown = "";
-            observer.unobserve(el);
-          });
-      },
-      { rootMargin: "0px 0px -8% 0px" },
-    );
-    grid.querySelectorAll(".tile-media").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  useReveal(gridRef);
 
   const step = useCallback(
     (dir: 1 | -1) => {
@@ -105,6 +87,7 @@ export function PhotoMosaic({ frames: photos }: { frames: Frame[] }) {
             type="button"
             onClick={() => open(i)}
             aria-label={`Ver foto ${i + 1}`}
+            data-reveal
             className="tile-media block size-full cursor-pointer"
           >
             <Image
@@ -115,7 +98,7 @@ export function PhotoMosaic({ frames: photos }: { frames: Frame[] }) {
             />
           </button>
         ) : (
-          <div aria-hidden="true" className="tile-media size-full bg-neutral-100" />
+          <div aria-hidden="true" data-reveal className="tile-media size-full bg-neutral-100" />
         )}
       </div>
     );
